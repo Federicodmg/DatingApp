@@ -1,13 +1,14 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, map } from "rxjs";
+import { environment } from "src/environments/environment";
 import { LoginData, User } from "../_models/user";
 
 @Injectable({
   providedIn: "root",
 })
 export class AccountService {
-  baseUrl: string = "https://localhost:5001/api/";
+  baseUrl: string = environment.apiUrl;
   private currentUserSource = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSource.asObservable();
 
@@ -17,8 +18,7 @@ export class AccountService {
     return this.http.post<User>(this.baseUrl + "account/login", form).pipe(
       map((user: User) => {
         if (user) {
-          localStorage.setItem("user", JSON.stringify(user));
-          this.currentUserSource.next(user);
+          this.setCurrentUser(user);
         }
       })
     );
@@ -28,14 +28,14 @@ export class AccountService {
     return this.http.post<User>(this.baseUrl + "account/register", user).pipe(
       map((user) => {
         if (user) {
-          localStorage.setItem("user", JSON.stringify(user));
-          this.currentUserSource.next(user);
+          this.setCurrentUser(user);
         }
       })
     );
   }
 
   setCurrentUser(user: User) {
+    localStorage.setItem("user", JSON.stringify(user));
     this.currentUserSource.next(user);
   }
 
